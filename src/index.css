@@ -39,3 +39,7 @@ body {
     cursor: pointer;
     color: #000;
 }
+
+.grey {
+    color: #999;
+}

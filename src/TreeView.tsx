@@ -1,27 +1,44 @@
 import * as React from 'react';
-import TreeNode, { SelectionState } from './data/TreeNode';
 import TreeConfig from './data/TreeConfig';
+import TreeNode, { SelectionState, DisplayState } from './data/TreeNode';
 
-interface Props extends React.ClassAttributes<TreeView> {
+export interface Props extends React.ClassAttributes<TreeView> {
     node: TreeNode;
     config: TreeConfig;
     updateState?: (pathToRoot: Array<TreeNode>) => void;
     pathToRoot?: Array<TreeNode>;
+    search?: string;
 }
 
-interface State extends React.ClassAttributes<TreeView> {
+class TreeView extends React.Component<Props, {}> {
     pathToRoot?: Array<TreeNode>;
-}
 
-class TreeView extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
         this.state = {};
     }
 
-    shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
-        return nextProps.pathToRoot === undefined || nextProps.pathToRoot.includes(this.props.node);
+    shouldComponentUpdate(nextProps: Props, nextState: {}): boolean {
+        if (nextProps.pathToRoot === undefined || nextProps.pathToRoot.includes(this.props.node)) {
+            return true;
+        }
+
+        if (this.props.search !== nextProps.search) {
+            return true;
+        }
+
+        return false;
+    }
+
+    componentWillReceiveProps(nextProps: Props) {
+        if (this.props.search !== nextProps.search) {
+            this.props.node.handleSearch(nextProps.search || '');
+        }
+    }
+
+    componentDidUpdate() {
+        this.pathToRoot = undefined;
     }
 
     updateState = (pathToRoot: Array<TreeNode>): void => {
@@ -31,9 +48,8 @@ class TreeView extends React.Component<Props, State> {
             // Mark every node as dirty.
             pathToRoot.forEach(node => node.dirty());
 
-            this.setState({
-                pathToRoot: pathToRoot
-            });
+            this.pathToRoot = pathToRoot;
+            this.setState({});
         }
     }
 
@@ -76,7 +92,7 @@ class TreeView extends React.Component<Props, State> {
                 return <i {...otherProps} onClick={onClick} className="fa tree-icon fa-chevron-right pointer" />;
             }
         } else {
-            return <div {...otherProps} className="tree-icon" />;
+            return <div {...otherProps} className="fa tree-icon" />;
         }
     }
 
@@ -102,14 +118,18 @@ class TreeView extends React.Component<Props, State> {
         if (node.expanded === true && node.nodes !== undefined && node.nodes.size > 0) {
             let children: Array<JSX.Element> = [];
             let nodes = config.filter !== undefined ? [...node.nodes.values()].filter(config.filter) : [...node.nodes.values()];
+            nodes = nodes.filter(child => child.visible !== DisplayState.invisible);
             nodes = config.sort !== undefined ? nodes.sort(config.sort) : nodes;
 
-            nodes.forEach(child => children.push(<li key={child.id}><TreeView node={child} config={config} updateState={this.props.updateState || this.updateState} pathToRoot={this.state.pathToRoot || this.props.pathToRoot} /></li>));
+            nodes.forEach(child => children.push(<li key={child.id}><TreeView node={child} config={config} updateState={this.props.updateState || this.updateState} pathToRoot={this.pathToRoot || this.props.pathToRoot} /></li>));
             subView = node.expanded === true && children.length > 0 ? <ul className="tree">{children}</ul> : <></>;
         }
 
+        let className = this.props.node.isSelectable(this.props.config) ? 'pointer' : 'disabled';
+        className += (this.props.node.visible !== DisplayState.visible ? ' grey' : '');
+
         return (
-            <div className={this.props.node.isSelectable(this.props.config) ? 'pointer' : 'disabled'}>
+            <div className={className}>
                 {
                     node.parent !== undefined || config.showRoot === true ?
                         <span onClick={this.handleActivate} onMouseDown={this.handleMouseDown}>{this.renderExpandIcon({ onClick: this.handleExpand })} {this.renderSelectionIcon()} {node.name}</span> :

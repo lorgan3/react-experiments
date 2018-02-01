@@ -1,4 +1,5 @@
 import TreeConfig from './TreeConfig';
+const escapeStringRegexp = require('escape-string-regexp');
 
 export enum SelectionState {
     checked = 'CHECKED',
@@ -6,8 +7,15 @@ export enum SelectionState {
     unchecked = 'UNCHECKED'
 }
 
+export enum DisplayState {
+    visible = 'VISIBLE',
+    relevant = 'RELEVANT',
+    invisible = 'INVISIBLE'
+}
+
 class TreeNode {
     nodes?: Map<number, TreeNode> = undefined;
+    visible: DisplayState = DisplayState.visible;
 
     _selectedNodes?: Array<TreeNode> = undefined;
 
@@ -29,10 +37,12 @@ class TreeNode {
     getSelectedNodes(): Array<TreeNode> {
         if (this._selectedNodes === undefined) {
             this._selectedNodes = [];
-            if (this.active === true) {
-                this._selectedNodes.push(this);
-            } else if (this.expanded === true && this.nodes !== undefined) {
-                this.nodes.forEach(node => this._selectedNodes = this._selectedNodes!.concat(node.getSelectedNodes()));
+            if (this.visible !== DisplayState.invisible) {
+                if (this.active === true) {
+                    this._selectedNodes.push(this);
+                } else if (this.expanded === true && this.nodes !== undefined) {
+                    this.nodes.forEach(node => this._selectedNodes = this._selectedNodes!.concat(node.getSelectedNodes()));
+                }
             }
         }
 
@@ -55,7 +65,7 @@ class TreeNode {
     isExpandable(config: TreeConfig): boolean {
         if (this._isExpandable === undefined) {
             this._isExpandable = ((this.nodes === undefined || this.nodes.size > 0) &&
-            (config.expandable === undefined || config.expandable(this) === true));
+                (config.expandable === undefined || config.expandable(this) === true));
         }
 
         return this._isExpandable;
@@ -111,6 +121,30 @@ class TreeNode {
         }
     }
 
+    handleSearch(search: string) {
+        if (search.trim() === '') {
+            this.visible = DisplayState.visible;
+            this.setVisibleForChildren(DisplayState.visible);
+        } else {
+            this.visible = DisplayState.invisible;
+            this.setVisibleForChildren(DisplayState.invisible);
+            this.updateSearch(new RegExp(escapeStringRegexp(search)));
+        }
+    }
+
+    updateSearch(query: RegExp) {
+        if (query.test(this.name)) {
+            this.expanded = false;
+            this.visible = DisplayState.visible;
+            this.setVisibleForChildren(DisplayState.relevant);
+            this.setRelevant();
+        } else if (this.nodes !== undefined) {
+            this.visible = DisplayState.invisible;
+            this.expanded = false;
+            this.nodes.forEach(node => node.updateSearch(query));
+        }
+    }
+
     async handleLazyLoad(config: TreeConfig): Promise<void> {
         if (config.lazyLoad === undefined) {
             this.nodes = new Map();
@@ -143,6 +177,14 @@ class TreeNode {
         this.active = active;
     }
 
+    setRelevant() {
+        if (this.parent !== undefined) {
+            this.parent.visible = DisplayState.relevant;
+            this.parent.expanded = true;
+            this.parent.setRelevant();
+        }
+    }
+
     setStateForAll(active: boolean, config?: TreeConfig): Array<TreeNode> {
         let updatedNodes: Array<TreeNode> = [this];
 
@@ -159,11 +201,20 @@ class TreeNode {
         return [];
     }
 
+    setVisibleForChildren(visible: DisplayState) {
+        if (this.nodes !== undefined) {
+            this.nodes.forEach(node => {
+                node.visible = visible;
+                node.setVisibleForChildren(visible);
+            });
+        }
+    }
+
     getSelectionState(clear?: boolean): SelectionState {
         if (clear === true || this._selectionState === undefined) {
             if (this.active) {
                 this._selectionState = SelectionState.checked;
-            } else if (this.expanded === true && this.nodes !== undefined) {
+            } else if (this.expanded === true && this.nodes !== undefined && this.visible !== DisplayState.invisible) {
                 const count = [...this.nodes.values()].reduce((total, node) => node.getSelectionState(clear) === SelectionState.unchecked ? total : total + 1, 0);
                 if (count === this.nodes.size) {
                     this._selectionState = SelectionState.checked;
