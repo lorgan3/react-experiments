@@ -26,6 +26,9 @@ class TreeNode {
     constructor(public id: number, public name: string, public parent?: TreeNode, public active?: boolean, public expanded?: boolean) {
     }
 
+    /**
+     * Get the root TreeNode.
+     */
     get root(): TreeNode {
         if (this.parent === undefined) {
             return this;
@@ -34,6 +37,9 @@ class TreeNode {
         return this.parent.root;
     }
 
+    /**
+     * Get all selected TreeNodes.
+     */
     getSelectedNodes(): Array<TreeNode> {
         if (this._selectedNodes === undefined) {
             this._selectedNodes = [];
@@ -49,6 +55,10 @@ class TreeNode {
         return this._selectedNodes;
     }
 
+    /**
+     * Get all TreeNodes that are required to reach the root TreeNode from the current TreeNode.
+     * @param path The path so far, should be undefined when called manually.
+     */
     getPathToRoot(path?: Array<TreeNode>): Array<TreeNode> {
         if (path === undefined) {
             path = [];
@@ -62,6 +72,10 @@ class TreeNode {
         return this.parent.getPathToRoot(path);
     }
 
+    /**
+     * Indicates whether the current TreeNode is expandable.
+     * @param config A TreeConfig.
+     */
     isExpandable(config: TreeConfig): boolean {
         if (this._isExpandable === undefined) {
             this._isExpandable = ((this.nodes === undefined || this.nodes.size > 0) &&
@@ -71,6 +85,10 @@ class TreeNode {
         return this._isExpandable;
     }
 
+    /**
+     * Indicates whether the current TreeNode is selectable.
+     * @param config A TreeConfig.
+     */
     isSelectable(config: TreeConfig): boolean {
         if (this._isSelectable === undefined) {
             this._isSelectable = (config.selectable === undefined || config.selectable(this) === true);
@@ -79,6 +97,9 @@ class TreeNode {
         return this._isSelectable;
     }
 
+    /**
+     * Marks a TreeNode as dirty (Clears the cache).
+     */
     dirty() {
         this._selectionState = undefined;
         this._isSelectable = undefined;
@@ -86,6 +107,12 @@ class TreeNode {
         this._selectedNodes = undefined;
     }
 
+    /**
+     * Perform actions when a user selects a TreeNode.
+     * @param config A TreeConfig.
+     * @param isolate If the user performed an isolate action.
+     * @param callback A callback that may be called after lazy loading.
+     */
     handleActivate(config: TreeConfig, isolate: boolean, callback: (nodes: Array<TreeNode>) => void): Array<TreeNode> {
         let updatedNodes: Array<TreeNode> = [];
         const active = this.getSelectionState() === SelectionState.unchecked;
@@ -103,6 +130,12 @@ class TreeNode {
         return updatedNodes;
     }
 
+    /**
+     * Perform actions when a user expands a TreeNode.
+     * @param config A TreeConfig.
+     * @param isolate If the user performed an isolate action.
+     * @param callback A callback that may be called after lazy loading.
+     */
     handleExpand(config: TreeConfig, isolate: boolean, callback: (nodes: Array<TreeNode>) => void): Array<TreeNode> {
         if (this.isExpandable(config)) {
             const initialState = this.active || false;
@@ -121,6 +154,10 @@ class TreeNode {
         }
     }
 
+    /**
+     * Updates the search state for the entire tree.
+     * @param search A search string.
+     */
     handleSearch(search: string) {
         if (search.trim() === '') {
             this.visible = DisplayState.visible;
@@ -132,6 +169,10 @@ class TreeNode {
         }
     }
 
+    /**
+     * Recursivly shows matching nodes and hides irrelevant ones.
+     * @param query The regular expression that will be used to determine which nodes are visible.
+     */
     updateSearch(query: RegExp) {
         if (query.test(this.name)) {
             this.expanded = false;
@@ -145,6 +186,10 @@ class TreeNode {
         }
     }
 
+    /**
+     * Attempts lazy loading the TreeNode's children.
+     * @param config A TreeConfig containing instructions on how to perform the lazy load.
+     */
     async handleLazyLoad(config: TreeConfig): Promise<void> {
         if (config.lazyLoad === undefined) {
             this.nodes = new Map();
@@ -159,6 +204,11 @@ class TreeNode {
         }
     }
 
+    /**
+     * Sets the expand state of the current TreeNode.
+     * When collapsing and all children are selected the TreeNode will be selected. Otherwise it will be deselected.
+     * @param expanded The new expanded state.
+     */
     setExpanded(expanded: boolean): Array<TreeNode> {
         this.expanded = expanded;
         if (expanded === true) {
@@ -173,10 +223,17 @@ class TreeNode {
         return [];
     }
 
+    /**
+     * Set the state of the current TeeNode.
+     * @param active The new state.
+     */
     setState(active: boolean) {
         this.active = active;
     }
 
+    /**
+     * Makes sure the node that this is called on is visible by expanding all parents and making them relevant.
+     */
     setRelevant() {
         if (this.parent !== undefined) {
             this.parent.visible = DisplayState.relevant;
@@ -185,6 +242,11 @@ class TreeNode {
         }
     }
 
+    /**
+     * Set the state for the current node or all children if it's expanded.
+     * @param active The new state
+     * @param config A TreeConfig which affects which nodes are selectable.
+     */
     setStateForAll(active: boolean, config?: TreeConfig): Array<TreeNode> {
         let updatedNodes: Array<TreeNode> = [this];
 
@@ -201,6 +263,10 @@ class TreeNode {
         return [];
     }
 
+    /**
+     * Updates the display state for all children.
+     * @param visible The display state for all children.
+     */
     setVisibleForChildren(visible: DisplayState) {
         if (this.nodes !== undefined) {
             this.nodes.forEach(node => {
@@ -210,6 +276,10 @@ class TreeNode {
         }
     }
 
+    /**
+     * Computes the selection state of the TreeNode.
+     * @param clear Clears the cache if true.
+     */
     getSelectionState(clear?: boolean): SelectionState {
         if (clear === true || this._selectionState === undefined) {
             if (this.active) {
@@ -231,6 +301,9 @@ class TreeNode {
         return this._selectionState;
     }
 
+    /**
+     * Get a string representation of the TreeNode.
+     */
     toJson(): string {
         return JSON.stringify(
             this,
@@ -243,6 +316,20 @@ class TreeNode {
             },
             4
         );
+    }
+
+    /**
+     * Clones a TreeNode. The parent will be undefined.
+     * @param recursive Also clone the children?
+     */
+    clone(recursive?: boolean): TreeNode {
+        let clone = new TreeNode(this.id, this.name, undefined, this.active, this.expanded);
+        if (recursive === true && this.nodes !== undefined) {
+            clone.nodes = new Map();
+            this.nodes.forEach(node => clone.nodes!.set(node.id, node.clone(recursive)));
+        }
+
+        return clone;
     }
 }
 
