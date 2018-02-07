@@ -8,6 +8,7 @@ interface Config {
     selectable?: (node: TreeNode) => boolean;
     lazyLoad?: (node: TreeNode) => Promise<void>;
     lazyLoadFailure?: (node: TreeNode, error: Error) => boolean;
+    remoteSearch?: (search: string, node: TreeNode) => Promise<void>;
 
     sort?: (a: TreeNode, b: TreeNode) => number;
     filter?: (node: TreeNode) => boolean;
@@ -21,6 +22,7 @@ class TreeConfig {
     selectable?: (node: TreeNode) => boolean;
     lazyLoad?: (node: TreeNode) => Promise<void>;
     lazyLoadFailure?: (node: TreeNode, error: Error) => boolean;
+    remoteSearch?: (search: string, node: TreeNode) => Promise<void>;
 
     sort?: (a: TreeNode, b: TreeNode) => number;
     filter?: (node: TreeNode) => boolean;

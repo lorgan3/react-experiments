@@ -7,7 +7,6 @@ export interface Props extends React.ClassAttributes<TreeView> {
     config: TreeConfig;
     updateState?: (pathToRoot: Array<TreeNode>) => void;
     pathToRoot?: Array<TreeNode>;
-    search?: string;
 }
 
 class TreeView extends React.Component<Props, {}> {
@@ -20,21 +19,7 @@ class TreeView extends React.Component<Props, {}> {
     }
 
     shouldComponentUpdate(nextProps: Props, nextState: {}): boolean {
-        if (nextProps.pathToRoot === undefined || nextProps.pathToRoot.includes(this.props.node)) {
-            return true;
-        }
-
-        if (this.props.search !== nextProps.search) {
-            return true;
-        }
-
-        return false;
-    }
-
-    componentWillReceiveProps(nextProps: Props) {
-        if (this.props.search !== nextProps.search) {
-            this.props.node.handleSearch(nextProps.search || '');
-        }
+        return (nextProps.pathToRoot === undefined || nextProps.pathToRoot.includes(this.props.node));
     }
 
     componentDidUpdate() {

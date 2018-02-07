@@ -143,7 +143,12 @@ class TreeNode {
 
             if (this.expanded === true && this.nodes === undefined) {
                 this.handleLazyLoad(config).then(() => {
-                    this.setStateForAll(initialState, config);
+                    if (this.nodes!.size > 0) {
+                        this.setStateForAll(initialState, config);
+                    } else {
+                        this.expanded = false;
+                    }
+
                     callback(nodes.concat(this.getPathToRoot()));
                 });
             }
@@ -158,10 +163,15 @@ class TreeNode {
      * Updates the search state for the entire tree.
      * @param search A search string.
      */
-    handleSearch(search: string) {
+    async handleSearch(search: string, config: TreeConfig) {
+        if (config.remoteSearch !== undefined) {
+            await config.remoteSearch(search, this);
+        }
+
         if (search.trim() === '') {
             this.visible = DisplayState.visible;
             this.setVisibleForChildren(DisplayState.visible);
+            this.optimize();
         } else {
             this.visible = DisplayState.invisible;
             this.setVisibleForChildren(DisplayState.invisible);
@@ -183,6 +193,20 @@ class TreeNode {
             this.visible = DisplayState.invisible;
             this.expanded = false;
             this.nodes.forEach(node => node.updateSearch(query));
+        }
+    }
+
+    /**
+     * Collapses all nodes that have no selected children. So the tree is as small as possible.
+     */
+    optimize() {
+        if (this.getSelectionState() === SelectionState.unchecked || this.active === true) {
+            this.setExpanded(false);
+        } else {
+            this.expanded = true; // Do not use setExpanded so the state is unaffected.
+            if (this.nodes !== undefined) {
+                this.nodes.forEach(node => node.optimize());
+            }
         }
     }
 
@@ -250,7 +274,7 @@ class TreeNode {
     setStateForAll(active: boolean, config?: TreeConfig): Array<TreeNode> {
         let updatedNodes: Array<TreeNode> = [this];
 
-        if (config === undefined || this.isSelectable(config)) {
+        if ((config === undefined || this.isSelectable(config)) && this.visible !== DisplayState.invisible) {
             if (this.expanded === true && this.nodes !== undefined) {
                 this.nodes.forEach(node => updatedNodes = updatedNodes.concat(node.setStateForAll(active, config)));
                 return updatedNodes;
@@ -326,7 +350,11 @@ class TreeNode {
         let clone = new TreeNode(this.id, this.name, undefined, this.active, this.expanded);
         if (recursive === true && this.nodes !== undefined) {
             clone.nodes = new Map();
-            this.nodes.forEach(node => clone.nodes!.set(node.id, node.clone(recursive)));
+            this.nodes.forEach(node => {
+                let subClone = node.clone(recursive);
+                subClone.parent = clone;
+                clone.nodes!.set(node.id, subClone);
+            });
         }
 
         return clone;
