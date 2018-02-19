@@ -1,57 +1,34 @@
 import * as React from 'react';
 import TreeView, { Props as baseProps } from './TreeView';
-const debounce = require('debounce');
-
-interface State extends React.ClassAttributes<SearchableTree> {
-    search: string;
-}
+import DebouncedInput from './DebouncedInput';
 
 interface Props extends baseProps {
     debounce?: number;
 }
 
-class SearchableTree extends React.Component<Props, State> {
+class SearchableTree extends React.Component<Props, {}> {
     search: string;
     debouncedFn: () => void;
 
     constructor(props: Props) {
         super(props);
 
-        this.state = {
-            search: ''
-        };
-
-        this.debouncedFn = debounce(
-            async () => {
-                await this.props.node.handleSearch(this.search, this.props.config);
-
-                // Update state after finishing the search.
-                this.setState({
-                    search: this.search
-                });
-            },
-            props.debounce || 0
-        );
-
+        this.state = {};
     }
 
-    onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        this.search = e.target.value;
+    onChange = async (value: string) => {
+        await this.props.node.handleSearch(value, this.props.config);
 
-        // Todo: have a loader here.
-        // await this.props.node.handleSearch(search, this.props.config);
-        this.debouncedFn();
-
-        this.setState({
-            search: this.search
-        });
+        // Update state after finishing the search.
+        this.setState({});
     }
 
     render() {
+        const { debounce, ...remainingProps } = this.props;
         return (
             <>
-            <input onChange={this.onChange} value={this.state.search} />
-            <TreeView {...this.props} />
+            <DebouncedInput onChange={this.onChange} debounce={debounce || 0} />
+            <TreeView {...remainingProps} />
             </>
         );
     }

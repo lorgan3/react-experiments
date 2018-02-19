@@ -43,3 +43,25 @@ body {
 .grey {
     color: #999;
 }
+
+.debounced-input {
+    padding: 1px;
+    padding-right: 2px;
+    border-width: 1px;
+    border-style: inset;
+    display: inline-block;
+}
+
+.debounced-input:focus-within {
+    outline: -webkit-focus-ring-color auto 5px;
+}
+
+.debounced-input>input {
+    border: none;
+    outline: none;
+    padding: 0;
+}
+
+.debounced-input>i {
+    vertical-align: middle;
+}
