@@ -113,18 +113,18 @@ class TreeView extends React.Component<Props, {}> {
         }
 
         let className = this.props.node.isSelectable(this.props.config) ? 'pointer' : 'disabled';
-        className += (this.props.node.visible === DisplayState.relevant ? ' bold' : '');
         className += ' tree-node';
 
+        let nameClass = (this.props.node.visible === DisplayState.relevant ? ' bold' : '');
         let name = (
-            <span className="truncate-middle">
+            <span className={'truncate-middle' + nameClass}>
                 <span>{node.name.substr(0, node.name.length - 8)}</span>
                 <span>{node.name.substr(node.name.length - 8)}</span>
             </span>
         );
 
         return (
-            <div className={className + ' ' + this.props.className}>
+            <div className={className + ' ' + this.props.className || ''}>
                 {
                     node.parent !== undefined || config.showRoot === true ?
                         <span onClick={this.handleActivate} onMouseDown={this.handleMouseDown}>{this.renderExpandIcon({ onClick: this.handleExpand })} {this.renderSelectionIcon()} {name}</span> :
