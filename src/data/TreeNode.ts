@@ -293,6 +293,8 @@ class TreeNode {
      */
     setVisibleForChildren(visible: DisplayState) {
         if (this.nodes !== undefined) {
+            this.dirty();
+
             this.nodes.forEach(node => {
                 node.visible = visible;
                 node.setVisibleForChildren(visible);
@@ -309,10 +311,20 @@ class TreeNode {
             if (this.active) {
                 this._selectionState = SelectionState.checked;
             } else if (this.expanded === true && this.nodes !== undefined && this.visible !== DisplayState.invisible) {
-                const count = [...this.nodes.values()].reduce((total, node) => node.getSelectionState(clear) === SelectionState.unchecked ? total : total + 1, 0);
-                if (count === this.nodes.size) {
+                let selectedCount = 0;
+                let visibleCount = 0;
+                [...this.nodes.values()].forEach(node => {
+                    if (node.visible !== DisplayState.invisible) {
+                        visibleCount++;
+                        if (node.getSelectionState(clear) !== SelectionState.unchecked) {
+                            selectedCount++;
+                        }
+                    }
+                });
+
+                if (selectedCount === visibleCount) {
                     this._selectionState = SelectionState.checked;
-                } else if (count === 0) {
+                } else if (selectedCount === 0) {
                     this._selectionState = SelectionState.unchecked;
                 } else {
                     this._selectionState = SelectionState.indeterminate;
