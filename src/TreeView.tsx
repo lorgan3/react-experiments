@@ -111,7 +111,7 @@ class TreeView extends React.Component<Props, {}> {
         }
 
         let className = this.props.node.isSelectable(this.props.config) ? 'pointer' : 'disabled';
-        className += (this.props.node.visible !== DisplayState.visible ? ' grey' : '');
+        className += (this.props.node.visible === DisplayState.relevant ? ' bold' : '');
 
         return (
             <div className={className}>

@@ -44,6 +44,10 @@ body {
     color: #999;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .debounced-input {
     padding: 1px;
     padding-right: 2px;

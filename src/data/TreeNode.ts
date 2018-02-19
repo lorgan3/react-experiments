@@ -186,8 +186,8 @@ class TreeNode {
     updateSearch(query: RegExp) {
         if (query.test(this.name)) {
             this.expanded = false;
-            this.visible = DisplayState.visible;
-            this.setVisibleForChildren(DisplayState.relevant);
+            this.visible = DisplayState.relevant;
+            this.setVisibleForChildren(DisplayState.visible);
             this.setRelevant();
         } else if (this.nodes !== undefined) {
             this.visible = DisplayState.invisible;
@@ -256,11 +256,11 @@ class TreeNode {
     }
 
     /**
-     * Makes sure the node that this is called on is visible by expanding all parents and making them relevant.
+     * Makes sure the node that this is called on is visible by expanding all parents and making them visible.
      */
     setRelevant() {
         if (this.parent !== undefined) {
-            this.parent.visible = DisplayState.relevant;
+            this.parent.visible = DisplayState.visible;
             this.parent.expanded = true;
             this.parent.setRelevant();
         }
