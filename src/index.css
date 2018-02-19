@@ -48,12 +48,22 @@ body {
     font-weight: bold;
 }
 
+.tree-node {
+    white-space: nowrap;
+}
+
+.tree-node.root {
+    border: 1px solid black;
+    width: 500px;
+}
+
 .debounced-input {
     padding: 1px;
     padding-right: 2px;
     border-width: 1px;
     border-style: inset;
     display: inline-block;
+    white-space: nowrap;
 }
 
 .debounced-input:focus-within {
@@ -68,4 +78,21 @@ body {
 
 .debounced-input>i {
     vertical-align: middle;
+}
+
+.truncate-middle {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.truncate-middle>span {
+    display: inline-block;
+    vertical-align: bottom;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.truncate-middle>span:first-child {
+    max-width: calc(100% - 8em);
+    text-overflow: ellipsis;
 }

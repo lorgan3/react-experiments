@@ -7,6 +7,8 @@ export interface Props extends React.ClassAttributes<TreeView> {
     config: TreeConfig;
     updateState?: (pathToRoot: Array<TreeNode>) => void;
     pathToRoot?: Array<TreeNode>;
+    truncate?: boolean;
+    className?: string;
 }
 
 class TreeView extends React.Component<Props, {}> {
@@ -112,12 +114,20 @@ class TreeView extends React.Component<Props, {}> {
 
         let className = this.props.node.isSelectable(this.props.config) ? 'pointer' : 'disabled';
         className += (this.props.node.visible === DisplayState.relevant ? ' bold' : '');
+        className += ' tree-node';
+
+        let name = (
+            <span className="truncate-middle">
+                <span>{node.name.substr(0, node.name.length - 8)}</span>
+                <span>{node.name.substr(node.name.length - 8)}</span>
+            </span>
+        );
 
         return (
-            <div className={className}>
+            <div className={className + ' ' + this.props.className}>
                 {
                     node.parent !== undefined || config.showRoot === true ?
-                        <span onClick={this.handleActivate} onMouseDown={this.handleMouseDown}>{this.renderExpandIcon({ onClick: this.handleExpand })} {this.renderSelectionIcon()} {node.name}</span> :
+                        <span onClick={this.handleActivate} onMouseDown={this.handleMouseDown}>{this.renderExpandIcon({ onClick: this.handleExpand })} {this.renderSelectionIcon()} {name}</span> :
                         <></>
                 }
                 {subView}

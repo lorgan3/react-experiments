@@ -23,7 +23,7 @@ let id = 1;
 function generateTree(parent?: TreeNode, children?: number): TreeNode {
     children = children === undefined ? Math.floor(random() * 3) : children;
 
-    let node = new TreeNode(id++, random().toString(36).substr(2, 9), parent);
+    let node = new TreeNode(id++, random().toString(36).substr(2, 9).repeat(10), parent);
     let nodes = new Map(new Array(children).fill(undefined).map((i, index): [number, TreeNode] => {
         let child = generateTree(node, Math.floor(index < 0 ? 0 : index / 2));
         return [child.id, child];
@@ -111,7 +111,7 @@ class App extends React.Component {
                     <h1 className="App-title">Welcome to React</h1>
                 </header>
                 <div className="App-intro">
-                    <SearchableTree node={tree} config={config} debounce={200} />
+                    <SearchableTree className="root" node={tree} config={config} debounce={200} />
                     {/* <code>
                         <pre>{tree.toJson()}</pre>
                     </code> */}
