@@ -48,11 +48,20 @@ body {
     font-weight: bold;
 }
 
-.tree-node {
-    white-space: nowrap;
+.float-right {
+    float: right;
 }
 
-.tree-node.root {
+.tree-node {
+    white-space: nowrap;
+    display: block;
+}
+
+.tree:hover > .tree-node {
+    background: rgba(100, 100, 100, 0.3);
+}
+
+.root {
     border: 1px solid black;
     width: 500px;
 }

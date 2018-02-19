@@ -8,7 +8,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 * ~~Isolating.~~
 * ~~Lazy loading.~~
 * ~~Searching.~~
-* Custom actions per node.
+* ~~Custom actions per node.~~
+* ~~Truncate long node names in the middle.~~
 * Find better solution to passing a callback to handleExpand and handleActivate.
 * Clean up the akward separation between the TreeNodes and the TreeConfig.
-* ~~Truncate long node names in the middle.~~

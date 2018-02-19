@@ -113,21 +113,31 @@ class TreeView extends React.Component<Props, {}> {
         }
 
         let className = this.props.node.isSelectable(this.props.config) ? 'pointer' : 'disabled';
-        className += ' tree-node';
+        className += ' tree';
 
-        let nameClass = (this.props.node.visible === DisplayState.relevant ? ' bold' : '');
-        let name = (
-            <span className={'truncate-middle' + nameClass}>
-                <span>{node.name.substr(0, node.name.length - 8)}</span>
-                <span>{node.name.substr(node.name.length - 8)}</span>
-            </span>
-        );
+        let nameClass = (this.props.node.visible === DisplayState.relevant ? 'tree-node bold' : 'tree-node');
+        let name;
+        if (node.name.length < 10) {
+            name = node.name;
+        } else {
+            name = (
+                <span className={'truncate-middle'}>
+                    <span>{node.name.substr(0, node.name.length - 8)}</span>
+                    <span>{node.name.substr(node.name.length - 8)}</span>
+                </span>
+            );
+        }
+
+        let customActions;
+        if (config.customActions !== undefined) {
+            customActions = config.customActions(node);
+        }
 
         return (
-            <div className={className + ' ' + this.props.className || ''}>
+            <div className={className + ' ' + (this.props.className || '')}>
                 {
                     node.parent !== undefined || config.showRoot === true ?
-                        <span onClick={this.handleActivate} onMouseDown={this.handleMouseDown}>{this.renderExpandIcon({ onClick: this.handleExpand })} {this.renderSelectionIcon()} {name}</span> :
+                        <span className={nameClass} onClick={this.handleActivate} onMouseDown={this.handleMouseDown}>{this.renderExpandIcon({ onClick: this.handleExpand })} {this.renderSelectionIcon()} {name}{customActions}</span> :
                         <></>
                 }
                 {subView}

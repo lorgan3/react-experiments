@@ -23,7 +23,7 @@ let id = 1;
 function generateTree(parent?: TreeNode, children?: number): TreeNode {
     children = children === undefined ? Math.floor(random() * 3) : children;
 
-    let node = new TreeNode(id++, random().toString(36).substr(2, 9).repeat(10), parent);
+    let node = new TreeNode(id++, random().toString(36).substr(2, 9), parent);
     let nodes = new Map(new Array(children).fill(undefined).map((i, index): [number, TreeNode] => {
         let child = generateTree(node, Math.floor(index < 0 ? 0 : index / 2));
         return [child.id, child];
@@ -46,6 +46,46 @@ const config = new TreeConfig({
             return a.name.localeCompare(b.name);
         }
     },
+    customActions: (node) => {
+        let actions: Array<JSX.Element> = [];
+
+        if (node.id % 15 === 0) {
+            actions.push((
+                <i
+                    key="fizzbuzz"
+                    className="fa fa-info-circle float-right"
+                    onClick={(e) => {
+                        alert(`fizzbuzz for node ${node.id}`);
+                        e.stopPropagation();
+                    }}
+                />
+            ));
+        } else if (node.id % 3 === 0) {
+            actions.push((
+                <i
+                    key="fizz"
+                    className="fa fa-edit float-right"
+                    onClick={(e) => {
+                        alert(`fizz for node ${node.id}`);
+                        e.stopPropagation();
+                    }}
+                />
+            ));
+        } else if (node.id % 5 === 0) {
+            actions.push((
+                <i
+                    key="buzz"
+                    className="fa fa-eraser float-right"
+                    onClick={(e) => {
+                        alert(`buzz for node ${node.id}`);
+                        e.stopPropagation();
+                    }}
+                />
+            ));
+        }
+
+        return actions;
+    }
     // lazyLoad: node => {
     //     return new Promise((resolve, reject) => {
     //         window.setTimeout(
@@ -112,9 +152,6 @@ class App extends React.Component {
                 </header>
                 <div className="App-intro">
                     <SearchableTree className="root" node={tree} config={config} debounce={200} />
-                    {/* <code>
-                        <pre>{tree.toJson()}</pre>
-                    </code> */}
                 </div>
             </div>
         );
