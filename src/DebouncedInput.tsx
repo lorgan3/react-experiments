@@ -6,24 +6,26 @@ interface State extends React.ClassAttributes<DebouncedInput> {
     loading: boolean;
 }
 
-interface Props extends React.ClassAttributes<DebouncedInput> {
-    debounce: number;
-    onChange: (value: string) => void | Promise<void>;
-}
+// TODO: find figure out the correct interface to extend from...
+// interface Props extends React.ClassAttributes<DebouncedInput> {
+//     debounce: number;
+//     onChange: (value: string) => void | Promise<void>;
+//     value?: string;
+// }
 
 /**
  * An input field with a debounced change callback and shows a loader
  * until the debounce ends and the change callback resolves.
  */
-class DebouncedInput extends React.Component<Props, State> {
+export default class DebouncedInput extends React.Component<any, State> {
     value: string;
     debouncedFn: () => Promise<void>;
 
-    constructor(props: Props) {
+    constructor(props: any) {
         super(props);
 
         this.state = {
-            value: '',
+            value: props.value || '',
             loading: false
         };
 
@@ -50,13 +52,12 @@ class DebouncedInput extends React.Component<Props, State> {
     }
 
     render() {
+        let { value, debounce, onChange, children, ...props} = this.props;
         return (
             <div className="debounced-input">
-                <input onChange={this.onChange} value={this.state.value} />
+                <input {...props} onChange={this.onChange} value={this.state.value} />
                 {this.state.loading === true ? <i className="fa fa-fw fa-spin fa-spinner" /> : <i className="fa fa-fw" />}
             </div>
         );
     }
 }
-
-export default DebouncedInput;

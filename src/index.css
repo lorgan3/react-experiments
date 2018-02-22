@@ -57,7 +57,7 @@ body {
     display: block;
 }
 
-.tree:hover > .tree-node {
+.tree:hover>.tree-node {
     background: rgba(100, 100, 100, 0.3);
 }
 

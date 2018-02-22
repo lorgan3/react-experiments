@@ -1,11 +1,12 @@
+const logo = require('./logo.svg');
+import './App.css';
 import 'map.prototype.tojson';
 import * as React from 'react';
 import SearchableTree from './SearchableTree';
+import TopologyArea from './Topology/TopologyArea';
+import TopologyNode from './data/TopologyNode';
 import TreeConfig from './data/TreeConfig';
 import TreeNode from './data/TreeNode';
-
-const logo = require('./logo.svg');
-import './App.css';
 
 let seed = 1;
 function random() {
@@ -142,6 +143,19 @@ const config = new TreeConfig({
 
 console.log(id, tree);
 
+id = 1;
+let topologyNodes: Array<TopologyNode> = [];
+
+let i = 2;
+// for (let i = 0; i < 20; i++) {
+let topologyNode = new TopologyNode(id++, undefined, []);
+for (let j = 0; j < 20 * i + 5; j++) {
+    topologyNode.nodes!.push(new TopologyNode(id++, topologyNode));
+}
+
+topologyNodes.push(topologyNode);
+// }
+
 class App extends React.Component {
     render() {
         return (
@@ -151,6 +165,7 @@ class App extends React.Component {
                     <h1 className="App-title">Welcome to React</h1>
                 </header>
                 <div className="App-intro">
+                    <TopologyArea nodes={topologyNodes} />
                     <SearchableTree className="root" node={tree} config={config} debounce={200} />
                 </div>
             </div>

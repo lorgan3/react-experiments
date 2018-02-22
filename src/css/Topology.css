@@ -1,0 +1,11 @@
+.topology-holder {
+    display: block;
+}
+
+.topology {
+    transition: transform 0.4s;
+}
+
+.topology .topology-spoke {
+    transition: transform 0.4s;
+}
