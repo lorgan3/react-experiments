@@ -43,7 +43,7 @@ export class RadialGroupPicker<T> {
         let firstMatch: Array<T> | undefined;
         let options: Array<Array<T>> = [];
         for (let i = 0; i < this.weights.length; i++) {
-            if (angle > totalWeight - step / 3 && angle <= totalWeight + step / 3) {
+            if (angle > totalWeight - step && angle <= totalWeight + step) {
                 options.push(this.groups[i]);
             }
 

@@ -64,6 +64,7 @@ export default class TopologyArea extends React.PureComponent<Props, State> {
 
         let id = 1;
         for (let i = 0; i < amount; i++) {
+            id = i * 100000;  // So the ids remain the same per topology.
             let size = Math.floor(random() * maxSize + 1);
             let topologyNode = new TopologyNode(id++, undefined, []);
             for (let j = 0; j < size; j++) {
