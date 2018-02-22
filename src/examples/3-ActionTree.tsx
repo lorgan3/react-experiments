@@ -1,12 +1,11 @@
 import * as React from 'react';
 import SearchableTree from '../treeView/SearchableTree';
 import TreeConfig from '../data/TreeConfig';
-import { generateTree } from './Common';
+import { tree } from './Common';
 
-const tree = generateTree(undefined, 50);
+let clone = tree.clone(true);
 const config: TreeConfig = new TreeConfig({
     showRoot: true,
-    expandable: node => node.id !== 1,
     selectable: (node, config) => !node.name.includes('2') && (node.parent === undefined || node.parent!.isSelectable(config)),
     sort: (a, b) => {
         if (a.isSelectable(config) !== b.isSelectable(config)) {
@@ -67,6 +66,6 @@ const config: TreeConfig = new TreeConfig({
 
 export const Example: React.StatelessComponent<{}> = () => {
     return (
-        <SearchableTree className="root" node={tree} config={config} debounce={200} />
+        <SearchableTree className="root" node={clone} config={config} debounce={200} />
     );
 };

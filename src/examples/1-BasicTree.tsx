@@ -1,10 +1,10 @@
 import * as React from 'react';
 import SearchableTree from '../treeView/SearchableTree';
 import TreeConfig from '../data/TreeConfig';
-import { generateTree } from './Common';
+import { tree } from './Common';
 
-const tree = generateTree(undefined, 50);
-tree.setExpanded(true);
+let clone = tree.clone(true);
+clone.setExpanded(true);
 
 const config: TreeConfig = new TreeConfig({
     showRoot: false,
@@ -25,6 +25,6 @@ const config: TreeConfig = new TreeConfig({
 
 export const Example: React.StatelessComponent<{}> = () => {
     return (
-        <SearchableTree className="root" node={tree} config={config} debounce={200} />
+        <SearchableTree className="root" node={clone} config={config} debounce={200} />
     );
 };

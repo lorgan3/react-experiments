@@ -29,3 +29,6 @@ export function generateTree(parent?: TreeNode, children?: number): TreeNode {
 
     return node;
 }
+
+// A constant tree that can be used in the examples.
+export const tree = generateTree(undefined, 50);

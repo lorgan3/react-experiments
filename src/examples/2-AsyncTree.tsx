@@ -1,10 +1,9 @@
 import * as React from 'react';
 import SearchableTree from '../treeView/SearchableTree';
 import TreeConfig from '../data/TreeConfig';
-import { generateTree } from './Common';
+import { tree } from './Common';
 
-const tree = generateTree(undefined, 50);
-
+let clone = tree.clone();
 const config = new TreeConfig({
     showRoot: true,
     sort: (a, b) => {
@@ -70,6 +69,6 @@ const config = new TreeConfig({
 
 export const Example: React.StatelessComponent<{}> = () => {
     return (
-        <SearchableTree className="root" node={tree.clone()} config={config} debounce={200} />
+        <SearchableTree className="root" node={clone} config={config} debounce={200} />
     );
 };
