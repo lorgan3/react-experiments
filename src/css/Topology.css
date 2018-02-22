@@ -1,4 +1,5 @@
 .topology-holder {
+    transition: width 0.4s ease-in, height 0.4s ease-in;
     display: block;
 }
 
@@ -8,4 +9,26 @@
 
 .topology .topology-spoke {
     transition: transform 0.4s;
+}
+
+.topology .detail {
+    transition: stroke-dasharray 0.4s;
+    stroke-width: 4px;
+    stroke: #ddd;
+    fill: transparent;
+}
+
+.topology .detail-left {
+    stroke: #333;
+    transform: rotate(90deg);
+}
+
+.topology .detail-right {
+    stroke: #666;
+    transform: rotate(90deg) scaleY(-1);
+}
+
+.topology text {
+    text-anchor: middle;
+    dominant-baseline: middle;
 }

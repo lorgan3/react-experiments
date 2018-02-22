@@ -162,6 +162,7 @@ export interface Props extends React.ClassAttributes<Topology> {
     topology: TopologyNode;
     x: number;
     y: number;
+    detailed?: boolean;
     groupFn?: (nodes: Array<TopologyNode>) => Array<Array<TopologyNode>>;
     style?: TopologyStyle;
 }
@@ -180,12 +181,26 @@ export default class Topology extends React.Component<Props, {}> {
         this.measurement = new RadialMeasurement(nextProps.topology, nextProps.groupFn === undefined);
     }
 
+    renderDetail(node: TopologyNode, radius: number) {
+        const circumference = 2 * Math.PI * radius;
+        return this.props.detailed === true ? (
+            <>
+                <circle cx={0} cy={0} r={radius} className="detail" />
+                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.leftDetail / 200 * circumference}, ${circumference}`} className="detail detail-left" />
+                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.rightDetail / 200 * circumference}, ${circumference}`} className="detail detail-right" />
+            </>
+        ) : undefined;
+    }
+
     renderNode(node: TopologyNode, rot: number, len: number, lineProps: { [key: string]: string }) {
         return (
             <g key={node.id} className="topology-spoke" style={{ transform: `rotate(${rot}deg)` }}>
                 <line {...lineProps} x1={0} y1={0} x2={len} y2={0.01} strokeWidth={3} />
-                <circle cx={len} cy={0} r={12} fill={node.color} />
-                {/* <text x={len - 10} y={0}>{node.id}</text> */}
+                <g style={{ transform: `translateX(${len}px) rotate(-${rot}deg)` }}>
+                    {this.renderDetail(node, 15)}
+                    <circle cx={0} cy={0} r={12} fill={node.color} />
+                    {/* <text>{node.id}</text> */}
+                </g>
             </g>
         );
     }
@@ -249,6 +264,7 @@ export default class Topology extends React.Component<Props, {}> {
         return (
             <g className="topology" style={{ transform: `translate(${this.props.x + this.measurement.size}px, ${this.props.y + this.measurement.size}px)` }}>
                 {...this.renderLayers(this.props.topology)}
+                {this.renderDetail(this.props.topology, 23)}
                 <circle className="center" cx={0} cy={0} r={20} fill={this.props.topology.color} />
             </g>
         );

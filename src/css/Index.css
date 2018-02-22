@@ -66,6 +66,6 @@ body {
     display: inline-block;
 }
 
-.ui input {
+.ui input:not([type="checkbox"]) {
     width: 70px;
 }
