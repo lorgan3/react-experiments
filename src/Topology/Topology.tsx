@@ -38,25 +38,28 @@ export class RadialGroupPicker<T> {
      * @param step The step size.
      */
     pick(angle: number, step: number): T | null {
-        let percent = angle % 360 / 360;
+        angle %= 360;
         let totalWeight = 0;
+        let firstMatch: Array<T> | undefined;
+        let options: Array<Array<T>> = [];
         for (let i = 0; i < this.weights.length; i++) {
-            totalWeight += this.weights[i];
+            if (angle > totalWeight - step / 3 && angle <= totalWeight + step / 3) {
+                options.push(this.groups[i]);
+            }
 
-            if (totalWeight >= percent) {
-                let node = this.groups![i].splice(0, 1)[0];
+            if (firstMatch === undefined && (totalWeight >= angle || totalWeight + this.weights[i] * 360 >= angle)) {
+                firstMatch = this.groups[i];
+            }
+            totalWeight += this.weights[i] * 360;
+        }
 
-                if (node !== undefined) {
-                    this.remaining--;
-                    return node;
-                }
-
-                // Check the next group if it would be skipped next step.
-                if (totalWeight + this.weights[(i + 1) % this.weights.length] > percent + step) {
-                    return null;
-                } else if (i >= this.weights.length) {
-                    i = 0;
-                }
+        // Exact matches take precedence, otherwise take the group with the most nodes.
+        let choice = (firstMatch !== undefined && firstMatch.length > 0) ? firstMatch : options.sort((a, b) => b.length - a.length)[0];
+        if (choice !== undefined) {
+            let node = choice.splice(0, 1)[0];
+            if (node !== undefined) {
+                this.remaining--;
+                return node;
             }
         }
 
@@ -99,7 +102,8 @@ export class RadialMeasurement {
         }
 
         if (exact === false) {
-            // Add one more fallback layer
+            // Add one more fallback layer.
+            // Ideally this isn't required but my radial grouping algorithm messes up sometimes :(
             this._nodesPerLayer.push(Math.round(initialDensity + this.layers * Math.PI * baseLength / lengthIncrease));
         }
     }
@@ -200,7 +204,7 @@ export default class Topology extends React.Component<Props, {}> {
             if (Math.round(traversedRotation + stepSize) > 360) {
                 layer++;
 
-                if (layer >= this.measurement.layers) {
+                if (layer > this.measurement.layers) {
                     console.error('overflow', layer, this.measurement, picker);
                     break;
                 }
