@@ -192,10 +192,25 @@ export default class Topology extends React.Component<Props, {}> {
         ) : undefined;
     }
 
-    renderNode(node: TopologyNode, rot: number, len: number, lineProps: { [key: string]: string }) {
+    renderSpoke(node: TopologyNode, rot: number, len: number, lineProps: { [key: string]: string }) {
+        return (
+            <line
+                key={node.id}
+                className="topology-spoke"
+                style={{ transform: `rotate(${rot}deg)` }}
+                {...lineProps}
+                x1={0}
+                y1={0}
+                x2={len}
+                y2={0.01}
+                strokeWidth={3}
+            />
+        );
+    }
+
+    renderNode(node: TopologyNode, rot: number, len: number) {
         return (
             <g key={node.id} className="topology-spoke" style={{ transform: `rotate(${rot}deg)` }}>
-                <line {...lineProps} x1={0} y1={0} x2={len} y2={0.01} strokeWidth={3} />
                 <g style={{ transform: `translateX(${len}px) rotate(-${rot}deg)` }}>
                     {this.renderDetail(node, 15)}
                     <circle cx={0} cy={0} r={12} fill={node.color} />
@@ -206,7 +221,8 @@ export default class Topology extends React.Component<Props, {}> {
     }
 
     renderLayers(node: TopologyNode) {
-        let children: Array<JSX.Element> = [];
+        let spokes: Array<JSX.Element> = [];
+        let nodes: Array<JSX.Element> = [];
 
         let picker = new RadialGroupPicker<TopologyNode>(this.props.topology.nodes!, this.measurement.steps, this.props.groupFn);
         let traversedRotation = 360;
@@ -247,23 +263,29 @@ export default class Topology extends React.Component<Props, {}> {
                         break;
                 }
 
-                children.push(this.renderNode(choice, rotation, radius, lineProps));
+                spokes.push(this.renderSpoke(choice, rotation, radius, lineProps));
+                nodes.push(this.renderNode(choice, rotation, radius));
             }
 
             rotation += stepSize;
             traversedRotation += stepSize;
         }
 
-        // In order to have the nodes not overlap return children.reverse().
-        // This causes the css transitions to not work because the order in the DOM is different...
-        // If you want the nodes not to overlap and still keep the transitions first render the spokes and then the node using 2 loops / arrays.
-        return children.sort((a, b) => a.key! > b.key! ? -1 : 1);
+        // The spokes and nodes are rendered separately so that the spokes don't overlap the nodes.
+        // If you don't care about overlapping, rendering the spokes and nodes at once might be more performant.
+        // Or if you don't care about the animations when grouping the nodes, render them in reverse order.
+        return (
+            <>
+                {spokes.sort((a, b) => a.key! > b.key! ? -1 : 1)}
+                {nodes.sort((a, b) => a.key! > b.key! ? -1 : 1)}
+            </>
+        );
     }
 
     render() {
         return (
             <g className="topology" style={{ transform: `translate(${this.props.x + this.measurement.size}px, ${this.props.y + this.measurement.size}px)` }}>
-                {...this.renderLayers(this.props.topology)}
+                {this.renderLayers(this.props.topology)}
                 {this.renderDetail(this.props.topology, 23)}
                 <circle className="center" cx={0} cy={0} r={20} fill={this.props.topology.color} />
             </g>
