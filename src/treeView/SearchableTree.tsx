@@ -1,6 +1,6 @@
 import * as React from 'react';
 import TreeView, { Props as baseProps } from './TreeView';
-import DebouncedInput from './DebouncedInput';
+import DebouncedInput from '../DebouncedInput';
 
 interface Props extends baseProps {
     debounce?: number;

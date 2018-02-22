@@ -1,5 +1,6 @@
-import * as React from 'react';
 const debounce = require('debounce');
+import './css/DebouncedInput.css';
+import * as React from 'react';
 
 interface State extends React.ClassAttributes<DebouncedInput> {
     value: string;

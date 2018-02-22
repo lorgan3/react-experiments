@@ -1,6 +1,7 @@
+import '../css/TreeView.css';
 import * as React from 'react';
-import TreeConfig from './data/TreeConfig';
-import TreeNode, { SelectionState, DisplayState } from './data/TreeNode';
+import TreeConfig from '../data/TreeConfig';
+import TreeNode, { SelectionState, DisplayState } from '../data/TreeNode';
 
 export interface Props extends React.ClassAttributes<TreeView> {
     node: TreeNode;
@@ -11,7 +12,7 @@ export interface Props extends React.ClassAttributes<TreeView> {
     className?: string;
 }
 
-class TreeView extends React.Component<Props, {}> {
+export default class TreeView extends React.Component<Props, {}> {
     pathToRoot?: Array<TreeNode>;
 
     constructor(props: Props) {
@@ -113,7 +114,7 @@ class TreeView extends React.Component<Props, {}> {
         }
 
         let className = this.props.node.isSelectable(this.props.config) ? 'pointer' : 'disabled';
-        className += ' tree';
+        className += ' tree-head';
 
         let nameClass = (this.props.node.visible === DisplayState.relevant ? 'tree-node bold' : 'tree-node');
         let name;
@@ -145,5 +146,3 @@ class TreeView extends React.Component<Props, {}> {
         );
     }
 }
-
-export default TreeView;

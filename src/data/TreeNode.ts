@@ -79,7 +79,7 @@ class TreeNode {
     isExpandable(config: TreeConfig): boolean {
         if (this._isExpandable === undefined) {
             this._isExpandable = ((this.nodes === undefined || this.nodes.size > 0) &&
-                (config.expandable === undefined || config.expandable(this) === true));
+                (config.expandable === undefined || config.expandable(this, config) === true));
         }
 
         return this._isExpandable;
@@ -91,7 +91,7 @@ class TreeNode {
      */
     isSelectable(config: TreeConfig): boolean {
         if (this._isSelectable === undefined) {
-            this._isSelectable = (config.selectable === undefined || config.selectable(this) === true);
+            this._isSelectable = (config.selectable === undefined || config.selectable(this, config) === true);
         }
 
         return this._isSelectable;

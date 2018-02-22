@@ -1,0 +1,71 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.App-intro {
+    text-align: left;
+    margin: 10px;
+}
+
+.fa {
+    width: 18px;
+    height: 18px;
+}
+
+.r90 {
+    transform: rotate(90deg);
+}
+
+.disabled {
+    color: #999;
+    cursor: pointer;
+}
+
+.pointer {
+    cursor: pointer;
+    color: #000;
+}
+
+.grey {
+    color: #999;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.float-right {
+    float: right;
+}
+
+.truncate-middle {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.truncate-middle>span {
+    display: inline-block;
+    vertical-align: bottom;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.truncate-middle>span:first-child {
+    max-width: calc(100% - 8em);
+    text-overflow: ellipsis;
+}
+
+.ui dd {
+    margin: 0 10px;
+    display: inline-block;
+}
+
+.ui dt {
+    display: inline-block;
+}
+
+.ui input {
+    width: 70px;
+}

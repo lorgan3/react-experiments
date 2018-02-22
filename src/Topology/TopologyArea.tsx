@@ -14,22 +14,25 @@ interface State extends React.ClassAttributes<TopologyArea> {
 }
 
 interface Props extends React.ClassAttributes<TopologyArea> {
-    nodes: Array<TopologyNode>;
+    maxSize?: number;
+    amount?: number;
+    style?: TopologyStyle;
+    sort?: boolean;
 }
 
 export default class TopologyArea extends React.PureComponent<Props, State> {
     debouncedResize: () => void;
 
-    constructor(props: { nodes: Array<TopologyNode> }) {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
-            maxSize: 5,
-            amount: 3,
-            style: TopologyStyle.filled,
-            sort: true,
+            maxSize: props.maxSize || 5,
+            amount: props.amount || 3,
+            style: props.style || TopologyStyle.filled,
+            sort: props.sort !== undefined ? props.sort : true,
             width: window.innerWidth,
-            nodes: this.getNodes(5, 3)
+            nodes: this.getNodes(props.maxSize || 5, props.amount || 3)
         };
 
         this.debouncedResize = debounce(
@@ -175,7 +178,7 @@ export default class TopologyArea extends React.PureComponent<Props, State> {
 
         return (
             <>
-                <dl className="fixed-ui">
+                <dl className="ui">
                     <dt><label htmlFor="maxSize">Maximum amount of nodes:</label></dt>
                     <dd><DebouncedInput id="maxSize" type="number" debounce={200} onChange={this.onSizeChange} value={this.state.maxSize} /></dd>
 

@@ -1,0 +1,27 @@
+.tree {
+    margin: 0;
+    list-style: none;
+    padding-left: 18px;
+}
+
+.tree.root {
+    padding-left: 0px;
+    border: 1px solid black;
+    max-width: 800px;
+    min-width: 200px;
+}
+
+.tree-icon {
+    display: inline-block;
+    transition: transform 0.2s;
+    transform-origin: 50%;
+}
+
+.tree-node {
+    white-space: nowrap;
+    display: block;
+}
+
+.tree-head:hover>.tree-node {
+    background: rgba(100, 100, 100, 0.3);
+}
