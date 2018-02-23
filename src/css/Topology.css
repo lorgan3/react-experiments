@@ -20,12 +20,10 @@
 
 .topology .detail-left {
     stroke: #333;
-    transform: rotate(90deg);
 }
 
 .topology .detail-right {
     stroke: #666;
-    transform: rotate(90deg) scaleY(-1);
 }
 
 .topology text {

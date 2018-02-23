@@ -1,6 +1,7 @@
 import '../css/Topology.css';
 import * as React from 'react';
 import TopologyNode from '../data/TopologyNode';
+import { transform } from '../SvgTransformToProps';
 
 export enum TopologyStyle {
     filled = 'FILLED',
@@ -186,8 +187,8 @@ export default class Topology extends React.Component<Props, {}> {
         return this.props.detailed === true ? (
             <>
                 <circle cx={0} cy={0} r={radius} className="detail" />
-                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.leftDetail / 200 * circumference}, ${circumference}`} className="detail detail-left" />
-                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.rightDetail / 200 * circumference}, ${circumference}`} className="detail detail-right" />
+                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.leftDetail / 200 * circumference}, ${circumference}`}  transform="rotate(90)" className="detail detail-left" />
+                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.rightDetail / 200 * circumference}, ${circumference}`} transform="rotate(90) scale(1 -1)" className="detail detail-right" />
             </>
         ) : undefined;
     }
@@ -197,7 +198,7 @@ export default class Topology extends React.Component<Props, {}> {
             <line
                 key={node.id}
                 className="topology-spoke"
-                style={{ transform: `rotate(${rot}deg)` }}
+                {...transform({ rotate: rot })}
                 {...lineProps}
                 x1={0}
                 y1={0}
@@ -210,8 +211,8 @@ export default class Topology extends React.Component<Props, {}> {
 
     renderNode(node: TopologyNode, rot: number, len: number) {
         return (
-            <g key={node.id} className="topology-spoke" style={{ transform: `rotate(${rot}deg)` }}>
-                <g style={{ transform: `translateX(${len}px) rotate(-${rot}deg)` }}>
+            <g key={node.id} className="topology-spoke" {...transform({ rotate: rot })}>
+                <g {...transform({ translate: [len, 0], rotate: -rot })}>
                     {this.renderDetail(node, 15)}
                     <circle cx={0} cy={0} r={12} fill={node.color} />
                     {/* <text>{node.id}</text> */}
@@ -284,7 +285,7 @@ export default class Topology extends React.Component<Props, {}> {
 
     render() {
         return (
-            <g className="topology" style={{ transform: `translate(${this.props.x + this.measurement.size}px, ${this.props.y + this.measurement.size}px)` }}>
+            <g className="topology" {...transform({ translate: [this.props.x + this.measurement.size, this.props.y + this.measurement.size] })}>
                 {this.renderLayers(this.props.topology)}
                 {this.renderDetail(this.props.topology, 23)}
                 <circle className="center" cx={0} cy={0} r={20} fill={this.props.topology.color} />

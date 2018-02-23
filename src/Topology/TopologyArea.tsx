@@ -28,6 +28,7 @@ interface Props extends React.ClassAttributes<TopologyArea> {
 export default class TopologyArea extends React.PureComponent<Props, State> {
     debouncedResize: () => void;
     interval: number;
+    ref: SVGElement;
 
     constructor(props: Props) {
         super(props);
@@ -39,14 +40,14 @@ export default class TopologyArea extends React.PureComponent<Props, State> {
             sort: props.sort !== undefined ? props.sort : true,
             animate: props.animate || false,
             detail: props.detail !== undefined ? props.detail : true,
-            width: window.innerWidth,
+            width: 0,
             nodes: this.getNodes(props.maxSize || 5, props.amount || 3),
         };
 
         this.debouncedResize = debounce(
             () => {
                 this.setState({
-                    width: window.innerWidth
+                    width: (this.ref.parentNode as HTMLElement).clientWidth
                 });
             },
             50
@@ -54,6 +55,10 @@ export default class TopologyArea extends React.PureComponent<Props, State> {
     }
 
     componentDidMount() {
+        this.setState({
+            width: (this.ref.parentNode as HTMLElement).clientWidth
+        });
+
         window.addEventListener('resize', this.debouncedResize);
         this.interval = window.setInterval(this.animate, 500);
     }
@@ -175,62 +180,64 @@ export default class TopologyArea extends React.PureComponent<Props, State> {
         let children: Array<JSX.Element> = [];
         let topologyProps: Array<TopologyProps> = [];
         let colors = new Set<string>();
+        let defs: Array<JSX.Element> = [];
 
         let maxX = 0;
         let maxSize = 0;
         let x = 0;
         let y = 0;
 
-        let flush = (measurement?: RadialMeasurement) => {
-            maxX = Math.max(maxX, x);
-            x = 0;
+        if (this.state.width > 0) {
+            let flush = (measurement?: RadialMeasurement) => {
+                maxX = Math.max(maxX, x);
+                x = 0;
 
-            topologyProps.forEach(props => {
-                props.y += maxSize + y;
-                children.push(<Topology detailed={this.state.detail} {...props} groupFn={this.state.sort ? this.groupFn : undefined} />);
-            });
+                topologyProps.forEach(props => {
+                    props.y += maxSize + y;
+                    children.push(<Topology detailed={this.state.detail} {...props} groupFn={this.state.sort ? this.groupFn : undefined} />);
+                });
 
-            if (measurement !== undefined) {
-                y += maxSize * 2;
+                if (measurement !== undefined) {
+                    y += maxSize * 2;
+                }
+
+                topologyProps.length = 0;
+                maxSize = 0;
+            };
+
+            let measurement: RadialMeasurement | undefined = undefined;
+            for (let i = 0; i < this.state.nodes.length; i++) {
+                const node = this.state.nodes[i];
+                node.nodes!.forEach(node => colors.add(node.color));
+                measurement = new RadialMeasurement(node, !this.state.sort);
+                if (topologyProps.length > 0 && x + measurement.size * 2 > this.state.width) {
+                    flush(measurement);
+                }
+
+                topologyProps.push({
+                    x: x,
+                    y: -measurement.size,
+                    style: this.state.style,
+                    topology: node,
+                    key: node.id
+                });
+
+                maxSize = Math.max(maxSize, measurement.size);
+                x += measurement.size * 2;
             }
 
-            topologyProps.length = 0;
-            maxSize = 0;
-        };
+            flush(measurement);
 
-        let measurement: RadialMeasurement | undefined = undefined;
-        for (let i = 0; i < this.state.nodes.length; i++) {
-            const node = this.state.nodes[i];
-            node.nodes!.forEach(node => colors.add(node.color));
-            measurement = new RadialMeasurement(node, !this.state.sort);
-            if (topologyProps.length > 0 && x + measurement.size * 2 > window.innerWidth) {
-                flush(measurement);
+            if (this.state.style === TopologyStyle.gradient) {
+                colors.forEach(color => {
+                    defs.push((
+                        <linearGradient id={`${color}-gradient`} key={color}>
+                            <stop offset="0" stopColor={color} stopOpacity={0} />
+                            <stop offset="1" stopColor={color} />
+                        </linearGradient>
+                    ));
+                });
             }
-
-            topologyProps.push({
-                x: x,
-                y: -measurement.size,
-                style: this.state.style,
-                topology: node,
-                key: node.id
-            });
-
-            maxSize = Math.max(maxSize, measurement.size);
-            x += measurement.size * 2;
-        }
-
-        flush(measurement);
-
-        let defs: Array<JSX.Element> = [];
-        if (this.state.style === TopologyStyle.gradient) {
-            colors.forEach(color => {
-                defs.push((
-                    <linearGradient id={`${color}-gradient`} key={color}>
-                        <stop offset="0" stopColor={color} stopOpacity={0} />
-                        <stop offset="1" stopColor={color} />
-                    </linearGradient>
-                ));
-            });
         }
 
         return (
@@ -265,7 +272,7 @@ export default class TopologyArea extends React.PureComponent<Props, State> {
                     </dd>
                 </dl>
 
-                <svg className="topology-holder" width={maxX} height={y}>
+                <svg ref={svg => { this.ref = svg!; }} className="topology-holder" width={maxX} height={y}>
                     <defs>
                         {...defs}
                     </defs>
