@@ -7,20 +7,19 @@ interface State extends React.ClassAttributes<DebouncedInput> {
     loading: boolean;
 }
 
-// TODO: find figure out the correct interface to extend from...
-// interface Props extends React.ClassAttributes<DebouncedInput> {
-//     debounce: number;
-//     onChange: (value: string) => void | Promise<void>;
-//     value?: string;
-// }
+interface Props extends React.ClassAttributes<DebouncedInput> {
+    debounce: number;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>;
+}
 
 /**
  * An input field with a debounced change callback and shows a loader
  * until the debounce ends and the change callback resolves.
  */
-export default class DebouncedInput extends React.Component<any, State> {
+export default class DebouncedInput extends React.Component<Props & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, State> {
     value: string;
     debouncedFn: () => Promise<void>;
+    event: React.ChangeEvent<HTMLInputElement>;
 
     constructor(props: any) {
         super(props);
@@ -32,7 +31,7 @@ export default class DebouncedInput extends React.Component<any, State> {
 
         this.debouncedFn = debounce(
             async () => {
-                await this.props.onChange(this.state.value);
+                await this.props.onChange(this.event);
 
                 this.setState({
                     loading: false
@@ -43,6 +42,8 @@ export default class DebouncedInput extends React.Component<any, State> {
     }
 
     onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.persist();
+        this.event = e;
         this.value = e.target.value;
         this.setState({
             value: this.value,
@@ -53,7 +54,7 @@ export default class DebouncedInput extends React.Component<any, State> {
     }
 
     render() {
-        let { value, debounce, onChange, children, ...props} = this.props;
+        let { value, debounce, onChange, ...props} = this.props;
         return (
             <div className="debounced-input">
                 <input {...props} onChange={this.onChange} value={this.state.value} />

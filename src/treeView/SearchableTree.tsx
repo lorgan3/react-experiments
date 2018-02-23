@@ -16,8 +16,8 @@ class SearchableTree extends React.Component<Props, {}> {
         this.state = {};
     }
 
-    onChange = async (value: string) => {
-        await this.props.node.handleSearch(value, this.props.config);
+    onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        await this.props.node.handleSearch(e.target.value, this.props.config);
 
         // Update state after finishing the search.
         this.setState({});
