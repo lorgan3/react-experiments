@@ -18,12 +18,8 @@ An attempt at creating an efficient treeview with many options to customize it.
 ### DebouncedInput
 A very basic input field with a debounce and shows a spinner until the callback resolves.
 
-**TODO:**
-* Find correct typedef for the Props.
-
 ### Topology
 Toy attempt to render svgs using react.
 
 **TODO:**
-* Somehow render the nodes in the correct order without messing with reacts diff algorithm.
-* Fix the pick algoritm sometimes causing infinite loops.
+* Fix the pick algoritm sometimes not working.
