@@ -168,12 +168,18 @@ export interface Props extends React.ClassAttributes<Topology> {
     style?: TopologyStyle;
 }
 
-export default class Topology extends React.Component<Props, {}> {
+export interface State extends React.ClassAttributes<Topology> {
+    hovered: number | null;
+}
+
+export default class Topology extends React.Component<Props, State> {
     measurement: RadialMeasurement;
 
     constructor(props: Props) {
         super(props);
-        this.state = {};
+        this.state = {
+            hovered: null
+        };
 
         this.measurement = new RadialMeasurement(props.topology, this.props.groupFn === undefined);
     }
@@ -182,18 +188,30 @@ export default class Topology extends React.Component<Props, {}> {
         this.measurement = new RadialMeasurement(nextProps.topology, nextProps.groupFn === undefined);
     }
 
+    onMouseOver = (e: React.MouseEvent<SVGElement>) => {
+        this.setState({
+            hovered: Number((e.target as HTMLElement).dataset.id)
+        });
+    }
+
+    onMouseOut = (e: React.MouseEvent<SVGElement>) => {
+        this.setState({
+            hovered: null
+        });
+    }
+
     renderDetail(node: TopologyNode, radius: number) {
         const circumference = 2 * Math.PI * radius;
         return this.props.detailed === true ? (
             <>
                 <circle cx={0} cy={0} r={radius} className="detail" />
-                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.leftDetail / 200 * circumference}, ${circumference}`}  transform="rotate(90)" className="detail detail-left" />
+                <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.leftDetail / 200 * circumference}, ${circumference}`} transform="rotate(90)" className="detail detail-left" />
                 <circle cx={0} cy={1} r={radius} strokeDasharray={`${node.rightDetail / 200 * circumference}, ${circumference}`} transform="rotate(90) scale(1 -1)" className="detail detail-right" />
             </>
         ) : undefined;
     }
 
-    renderSpoke(node: TopologyNode, rot: number, len: number, lineProps: { [key: string]: string }) {
+    renderSpoke(node: TopologyNode, rot: number, len: number, lineProps: React.SVGProps<SVGLineElement>) {
         return (
             <line
                 key={node.id}
@@ -211,14 +229,24 @@ export default class Topology extends React.Component<Props, {}> {
 
     renderNode(node: TopologyNode, rot: number, len: number) {
         return (
-            <g key={node.id} className="topology-spoke" {...transform({ rotate: rot })}>
+            <g key={node.id} className="topology-spoke" {...transform({ rotate: rot })} >
                 <g {...transform({ translate: [len, 0], rotate: -rot })}>
                     {this.renderDetail(node, 15)}
-                    <circle cx={0} cy={0} r={12} fill={node.color} />
+                    {this.renderHoverEffect(node, 20)}
+                    <circle cx={0} cy={0} r={12} fill={node.color} data-id={node.id} onMouseOver={this.onMouseOver} onMouseOut={this.onMouseOut} />
                     {/* <text>{node.id}</text> */}
                 </g>
             </g>
         );
+    }
+
+    renderHoverEffect(node: TopologyNode, radius: number) {
+        return this.state.hovered === node.id ? (
+            <>
+                <circle cx={0} cy={0} r={radius} fill="transparent" strokeWidth={2} stroke={node.color} />
+                <circle cx={0} cy={0} r={radius + 6} fill="transparent" strokeWidth={10} strokeOpacity={0.6} stroke={node.color} />
+            </>
+        ) : undefined;
     }
 
     renderLayers(node: TopologyNode) {
@@ -250,7 +278,7 @@ export default class Topology extends React.Component<Props, {}> {
 
             let choice = picker.pick(rotation, stepSize);
             if (choice !== null) {
-                let lineProps: { [key: string]: string } = {};
+                let lineProps: React.SVGProps<SVGLineElement> = {};
                 switch (this.props.style) {
                     case TopologyStyle.filled:
                         lineProps = { stroke: choice.color, strokeOpacity: '0.6' };
@@ -288,7 +316,17 @@ export default class Topology extends React.Component<Props, {}> {
             <g className="topology" {...transform({ translate: [this.props.x + this.measurement.size, this.props.y + this.measurement.size] })}>
                 {this.renderLayers(this.props.topology)}
                 {this.renderDetail(this.props.topology, 23)}
-                <circle className="center" cx={0} cy={0} r={20} fill={this.props.topology.color} />
+                {this.renderHoverEffect(this.props.topology, 28)}
+                <circle
+                    className="center"
+                    cx={0}
+                    cy={0}
+                    r={20}
+                    fill={this.props.topology.color}
+                    data-id={this.props.topology.id}
+                    onMouseOver={this.onMouseOver}
+                    onMouseOut={this.onMouseOut}
+                />
             </g>
         );
     }
