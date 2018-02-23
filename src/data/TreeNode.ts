@@ -162,6 +162,7 @@ class TreeNode {
     /**
      * Updates the search state for the entire tree.
      * @param search A search string.
+     * @param config A TreeConfig.
      */
     async handleSearch(search: string, config: TreeConfig) {
         if (config.remoteSearch !== undefined) {
@@ -171,7 +172,7 @@ class TreeNode {
         if (search.trim() === '') {
             this.visible = DisplayState.visible;
             this.setVisibleForChildren(DisplayState.visible);
-            this.optimize();
+            this.optimize(config);
         } else {
             this.visible = DisplayState.invisible;
             this.setVisibleForChildren(DisplayState.invisible);
@@ -198,14 +199,15 @@ class TreeNode {
 
     /**
      * Collapses all nodes that have no selected children. So the tree is as small as possible.
+     * @param config A TreeConfig.
      */
-    optimize() {
-        if (this.getSelectionState() === SelectionState.unchecked || this.active === true) {
+    optimize(config: TreeConfig) {
+        if ((this.getSelectionState() === SelectionState.unchecked || this.active === true) && (config.showRoot === true || this.parent !== undefined)) {
             this.setExpanded(false);
         } else {
             this.expanded = true; // Do not use setExpanded so the state is unaffected.
             if (this.nodes !== undefined) {
-                this.nodes.forEach(node => node.optimize());
+                this.nodes.forEach(node => node.optimize(config));
             }
         }
     }
@@ -316,9 +318,8 @@ class TreeNode {
                 [...this.nodes.values()].forEach(node => {
                     if (node.visible !== DisplayState.invisible) {
                         visibleCount++;
-                        if (node.getSelectionState(clear) !== SelectionState.unchecked) {
-                            selectedCount++;
-                        }
+                        let selectionState = node.getSelectionState(clear);
+                        selectedCount += selectionState === SelectionState.checked ? 1 : selectionState === SelectionState.indeterminate ? 0.5 : 0;
                     }
                 });
 

@@ -9,7 +9,6 @@ clone.setExpanded(true);
 const config: TreeConfig = new TreeConfig({
     showRoot: false,
     expandable: node => node.id !== 1,
-    selectable: (node, config) => !node.name.includes('2') && (node.parent === undefined || node.parent!.isSelectable(config)),
     sort: (a, b) => {
         if (a.isSelectable(config) !== b.isSelectable(config)) {
             return b.isSelectable(config) ? 1 : -1;
